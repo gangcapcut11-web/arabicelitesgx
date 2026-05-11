@@ -85,9 +85,12 @@ function ItemPage() {
 
               <div className="mt-6 flex flex-wrap gap-3">
                 {fileUrl && (
-                  <a href={fileUrl} target="_blank" rel="noopener" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary-soft text-accent-foreground font-bold hover:scale-105 transition-transform">
-                    <Download className="w-4 h-4" /> فتح في نافذة جديدة
-                  </a>
+                  <>
+                    <a href={fileUrl} target="_blank" rel="noopener" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary-soft text-accent-foreground font-bold hover:scale-105 transition-transform">
+                      <Download className="w-4 h-4" /> فتح في نافذة جديدة
+                    </a>
+                    <DownloadButton url={fileUrl} filename={`${item.title}${item.kind === "pdf" ? ".pdf" : ""}`} />
+                  </>
                 )}
                 {admin && (
                   <button onClick={handleDelete} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-destructive text-destructive-foreground font-bold hover:scale-105 transition-transform">
