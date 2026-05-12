@@ -2,9 +2,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
 import { Lock, Upload, Loader2, LogOut, CheckCircle2, AlertCircle } from "lucide-react";
-import { isAdmin, unlockAdmin, lockAdmin } from "@/lib/admin";
+import { isAdmin, unlockAdmin, lockAdmin, ADMIN_PASSWORD } from "@/lib/admin";
 import { SECTIONS } from "@/lib/sections";
 import { supabase } from "@/integrations/supabase/client";
+import { adminCreateUploadUrl, adminCreateItem } from "@/lib/admin-actions.functions";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "لوحة التحكم — المسؤول" }] }),
