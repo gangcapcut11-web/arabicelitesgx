@@ -1,14 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { supabaseAdmin } from "@/integrations/supabase/client.server";
-
-const ADMIN_PASSWORD = "3349016";
-const BUCKET = "content";
-
-function assertAdmin(password: unknown) {
-  if (typeof password !== "string" || password !== ADMIN_PASSWORD) {
-    throw new Response("Unauthorized", { status: 401 });
-  }
-}
+import { supabaseAdmin, assertAdmin, BUCKET } from "./admin-actions.server";
 
 export const adminCreateUploadUrl = createServerFn({ method: "POST" })
   .inputValidator((d: { password: string; section: string; ext: string }) => {
