@@ -4,8 +4,9 @@ import Layout from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Loader2, Download, Trash2 } from "lucide-react";
 import { extractYouTubeId } from "./section.$slug";
-import { isAdmin } from "@/lib/admin";
+import { isAdmin, ADMIN_PASSWORD } from "@/lib/admin";
 import { sectionBySlug } from "@/lib/sections";
+import { adminDeleteItem } from "@/lib/admin-actions.functions";
 
 type Item = {
   id: string; section: string; title: string; description: string | null;
@@ -39,9 +40,12 @@ function ItemPage() {
 
   async function handleDelete() {
     if (!item || !confirm("هل تريد حذف هذا العنصر؟")) return;
-    if (item.file_path) await supabase.storage.from("content").remove([item.file_path]);
-    await supabase.from("items").delete().eq("id", item.id);
-    window.location.href = `/section/${item.section}`;
+    try {
+      await adminDeleteItem({ data: { password: ADMIN_PASSWORD, id: item.id } });
+      window.location.href = `/section/${item.section}`;
+    } catch (e: any) {
+      alert(e?.message || "فشل الحذف");
+    }
   }
 
   if (loading) return <Layout><div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div></Layout>;
