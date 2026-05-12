@@ -4,8 +4,9 @@ import Layout from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Loader2, Download, Trash2 } from "lucide-react";
 import { extractYouTubeId } from "./section.$slug";
-import { isAdmin } from "@/lib/admin";
+import { isAdmin, ADMIN_PASSWORD } from "@/lib/admin";
 import { sectionBySlug } from "@/lib/sections";
+import { adminDeleteItem } from "@/lib/admin-actions.functions";
 
 type Item = {
   id: string; section: string; title: string; description: string | null;
