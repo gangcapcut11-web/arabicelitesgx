@@ -87,17 +87,15 @@ function UploadForm() {
 
   const accept = kind === "pdf" ? "application/pdf" : "video/*";
 
-  async function uploadWithRetry(path: string, blob: File, attempts = 3): Promise<string> {
+  async function uploadWithRetry(signedUrl: string, token: string, path: string, blob: File, attempts = 3) {
     let lastErr: any;
     for (let i = 0; i < attempts; i++) {
       try {
-        const { error } = await supabase.storage.from("content").upload(path, blob, {
-          cacheControl: "3600",
-          upsert: false,
+        const { error } = await supabase.storage.from("content").uploadToSignedUrl(path, token, blob, {
           contentType: blob.type,
         });
         if (error) throw error;
-        return path;
+        return;
       } catch (e) {
         lastErr = e;
         await new Promise((r) => setTimeout(r, 1000 * (i + 1)));
@@ -118,25 +116,31 @@ function UploadForm() {
       let file_path: string | null = null;
 
       if (file) {
-        const ext = file.name.split(".").pop();
-        const path = `${section}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-        // Fake smooth progress (Supabase JS doesn't expose progress for direct uploads)
+        const ext = (file.name.split(".").pop() || "bin").toLowerCase();
+        const signed = await adminCreateUploadUrl({
+          data: { password: ADMIN_PASSWORD, section, ext },
+        });
         const ticker = setInterval(() => setProgress((p) => Math.min(95, p + 2)), 250);
         try {
-          file_path = await uploadWithRetry(path, file);
+          await uploadWithRetry(signed.signedUrl, signed.token, signed.path, file);
+          file_path = signed.path;
         } finally {
           clearInterval(ticker);
           setProgress(100);
         }
       }
 
-      const { error: dbErr } = await supabase.from("items").insert({
-        section, kind, title: title.trim(),
-        description: description.trim() || null,
-        file_path,
-        youtube_url: kind === "youtube" ? youtubeUrl.trim() : null,
+      await adminCreateItem({
+        data: {
+          password: ADMIN_PASSWORD,
+          section,
+          kind,
+          title: title.trim(),
+          description: description.trim() || null,
+          file_path,
+          youtube_url: kind === "youtube" ? youtubeUrl.trim() : null,
+        },
       });
-      if (dbErr) throw dbErr;
 
       setSuccess(true);
       setTitle(""); setDescription(""); setYoutubeUrl(""); setFile(null);
